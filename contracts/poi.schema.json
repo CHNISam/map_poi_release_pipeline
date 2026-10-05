@@ -1,0 +1,34 @@
+{
+  "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
+  "name": "poi",
+  "title": "POI Canonical Schema (derived from map_poi_poi DDL + poiCapabilities)",
+  "description": "Canonical POI contract for poi-release-pipeline. Source-of-truth synced from map-miniprogram/common/poiCapabilities.js & backend/data/sql/prod_new_schema.sql map_poi_poi DDL via scripts/sync-contract.js",
+  "primaryKey": ["_id"],
+  "missingValues": ["", "null", "NULL", "N/A", "-"],
+  "fields": [
+    { "name": "_id", "type": "string", "constraints": { "required": true, "minLength": 1, "maxLength": 64, "unique": true }, "description": "Stable identity, deterministic: shenzhen:{rawId} or sha256(name+address+lat5+lng5)" },
+    { "name": "category_id", "type": "string", "constraints": { "required": true, "enum": ["0","1","2","3","4","5","6","7","8"] }, "description": "FK to POI_TYPE_MAP, 0=无障碍卫生间 1=母婴室 7=含婴儿照料 8=爱心驿站 etc" },
+    { "name": "name", "type": "string", "constraints": { "required": true, "minLength": 1, "maxLength": 200 }, "title": "场所名称" },
+    { "name": "address", "type": "string", "constraints": { "required": true, "minLength": 1, "maxLength": 500 }, "title": "地址" },
+    { "name": "latitude", "type": "number", "constraints": { "required": true, "minimum": -90, "maximum": 90 }, "description": "WGS84, decimal 10,7, not 0" },
+    { "name": "longitude", "type": "number", "constraints": { "required": true, "minimum": -180, "maximum": 180 }, "description": "WGS84, decimal 10,7, not 0" },
+    { "name": "city", "type": "string", "constraints": { "required": false, "maxLength": 64 }, "description": "Optional, derived from address if missing" },
+    { "name": "photo_cloud_ids", "type": "array", "constraints": { "required": false }, "description": "JSON array of cloud:// ids, semicolon joined in CSV" },
+    { "name": "desc", "type": "string", "constraints": { "required": false }, "description": "JSON string, station_meta when category 8" },
+    { "name": "contact_name", "type": "string", "constraints": { "required": false, "maxLength": 100 } },
+    { "name": "contact_phone", "type": "string", "constraints": { "required": false, "maxLength": 30 } },
+    { "name": "weight", "type": "number", "constraints": { "required": false } },
+    { "name": "is_offline", "type": "boolean", "constraints": { "required": false } },
+    { "name": "is_deleted", "type": "boolean", "constraints": { "required": false } },
+    { "name": "source_hash", "type": "string", "constraints": { "required": true }, "description": "sha256 of canonical row JSON, for idempotency" },
+    { "name": "source_file", "type": "string", "constraints": { "required": true }, "description": "Origin file path" },
+    { "name": "source_row", "type": "integer", "constraints": { "required": true }, "description": "1-indexed row in source file" }
+  ],
+  "customChecks": [
+    { "code": "zero-coordinate", "severity": "BLOCK", "description": "lat==0 && lng==0 拒绝" },
+    { "code": "swapped-coordinate", "severity": "WARNING", "description": "lat>35 or lng<90 且交换后落入粤 bbox，疑似交换" },
+    { "code": "out-of-core-bbox", "severity": "WARNING", "description": "粤核心 22.0-24.5,112.5-115.5 外需 review，粤全域 20.0-25.5,109.5-117.5 外强烈 WARNING" },
+    { "code": "suspected-duplicate", "severity": "WARNING", "description": "同 name+round(lat,4)+round(lng,4) 重复" },
+    { "code": "photo-cloud-id-format", "severity": "WARNING", "description": "非 cloud:// 前缀的 photo id" }
+  ]
+}

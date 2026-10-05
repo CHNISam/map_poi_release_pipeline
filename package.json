@@ -1,0 +1,25 @@
+{
+  "name": "poi-release-pipeline",
+  "version": "0.1.0",
+  "description": "POI Data Release Harness — canonicalize → contract → quality → diff → gate → apply → verify → evidence",
+  "type": "commonjs",
+  "scripts": {
+    "sync:contract": "node scripts/sync-contract.js",
+    "release:review": "node scripts/release.js review",
+    "release:gate": "node scripts/release.js gate",
+    "release:apply": "node scripts/release.js apply",
+    "release:verify": "node scripts/release.js verify",
+    "test": "node --test tests/**/*.test.js",
+    "check:env": "node src/environments/guard.js"
+  },
+  "dependencies": {
+    "zod": "^3.23.8",
+    "csv-parse": "^5.5.6",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "knex": "^3.1.0",
+    "mysql2": "^3.9.7"
+  },
+  "engines": { "node": ">=14" }
+}

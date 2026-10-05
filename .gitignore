@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+# releases evidence is INTENTIONALLY tracked — do not ignore
+# but ignore local tmp
+releases/tmp/
+*.log
